@@ -2,7 +2,7 @@
 {
     public interface IGet<Entity> where Entity : class
     {
-        Task<List<Entity>> Get();
+        Task<List<Entity>> GetAll();
         Task<Entity?> GetById(int id);
     }
 }

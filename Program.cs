@@ -1,5 +1,8 @@
 using f1api.Models;
+using f1api.Service;
+using f1api.Service.IService;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddHttpClient();
+//builder.Services.AddSingleton<IConfiguration>();
+
+
 
 builder.Services.AddDbContext<F1Context>(options =>
 {
