@@ -2,6 +2,6 @@
 {
     public interface IUpdate <Entity> where Entity : class
     {
-        Task UpdateAsync(Entity entity);
+        Task<Entity> Update(Entity entity,int id);
     }
 }

@@ -5,7 +5,7 @@ namespace f1api.Service.IService
 {
     public interface IDriverService: IGenericService<Driver>
     {
-        Task <IEnumerable<CarDriverDto>> GetAllCardDrivers ();
-        Task <CarDriverDto> GetCardDriver (int id);
+        Task <IEnumerable<CardDriverDto>> GetAllCardDrivers ();
+        Task <CardDriverDto> GetCardDriver (int id);
     }
 }

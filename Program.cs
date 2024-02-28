@@ -1,6 +1,8 @@
 using f1api.Models;
 using f1api.Service;
 using f1api.Service.IService;
+using F1api.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -20,7 +22,8 @@ builder.Services.AddDbContext<F1Context>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("F1"));
 });
-
+//Validators
+builder.Services.AddScoped<IValidator<Driver>,DriverValidator>();
 
 var app = builder.Build();
 

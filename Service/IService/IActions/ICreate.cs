@@ -2,6 +2,6 @@
 {
     public interface ICreate<Entity> where Entity : class
     {
-        Task Create(Entity entity);
+        Task<Entity> Create(Entity entity);
     }
 }

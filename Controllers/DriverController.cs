@@ -2,6 +2,7 @@
 using f1api.Models;
 using f1api.Service;
 using f1api.Service.IService;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -12,51 +13,113 @@ namespace F1api.Controllers
     [ApiController]
     public class DriverController : ControllerBase
     {
-        public readonly IDriverService _driverService;
-        public DriverController(IDriverService driverService)
+        private readonly IDriverService _driverService;
+        private IValidator<Driver> _driverValidator;
+        public DriverController(IDriverService driverService, IValidator<Driver> validator)
         {
+          _driverValidator= validator;
             _driverService = driverService;
         }
         // GET: api/<DriverController>
         [HttpGet]
-        public Task<List<Driver>>  GetAll()
+        public async   Task<IActionResult> GetAll()
         {
-           var ListDrivers= _driverService.GetAll();
+            try
+            {
+                var ListDrivers =await  _driverService.GetAll();
 
-            return ListDrivers;
+                return Ok(ListDrivers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }   
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try{
+                var driverToGet = await _driverService.GetById(id);
+                return Ok(driverToGet); 
+            }catch (Exception ex){
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("Cards")]
-        public async Task<IEnumerable<CarDriverDto>> GetAllCards()
+        public async Task<IActionResult> GetAllCards()
         {
-            var ListDrivers = await _driverService.GetAllCardDrivers();
+            try
+            {
+                var ListDrivers = await _driverService.GetAllCardDrivers();
 
-            return ListDrivers;
+                return Ok(ListDrivers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // GET api/<DriverController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+     
+      
 
         // POST api/<DriverController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Add([FromBody] Driver driver)
         {
+            try
+            {
+                var validationResult =await  _driverValidator.ValidateAsync(driver);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(validationResult.Errors);
+                }
+                await _driverService.Create(driver);
+                return Ok(driver);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT api/<DriverController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{id:int}")]
+        public async  Task<IActionResult> Put(Driver driver,int id)
         {
+            try
+            {
+               var validationResult = await _driverValidator.ValidateAsync(driver);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(validationResult.Errors);
+                }
+                await _driverService.Update(driver, id);
+                return Ok(driver);
+
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE api/<DriverController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            try
+            {
+                await _driverService.Delete(new Driver { Id = id });
+                return Ok("The driver with the ID: " + id + " has been deleted.");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
