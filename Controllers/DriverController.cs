@@ -4,6 +4,7 @@ using f1api.Service;
 using f1api.Service.IService;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,6 +27,7 @@ namespace F1api.Controllers
         {
             try
             {
+                Debug.Print("Driver:  debug");
                 var ListDrivers =await  _driverService.GetAll();
 
                 return Ok(ListDrivers);
@@ -92,6 +94,7 @@ namespace F1api.Controllers
         {
             try
             {
+             
                var validationResult = await _driverValidator.ValidateAsync(driver);
                 if (!validationResult.IsValid)
                 {

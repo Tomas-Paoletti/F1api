@@ -1,6 +1,10 @@
+using AutoMapper;
 using f1api.Models;
 using f1api.Service;
 using f1api.Service.IService;
+using F1api.Automappers;
+using F1api.Repository;
+using F1api.Repository.IRepository;
 using F1api.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +18,17 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddHttpClient();
+var mapperConfig = new MapperConfiguration(mc =>
+{
+    mc.AddProfile(new AutoMapperProfile());
+});
+
+IMapper mapper = mapperConfig.CreateMapper();
+
+
+builder.Services.AddSingleton(mapper);
+//builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
 //builder.Services.AddSingleton<IConfiguration>();
 
 
@@ -24,6 +39,14 @@ builder.Services.AddDbContext<F1Context>(options =>
 });
 //Validators
 builder.Services.AddScoped<IValidator<Driver>,DriverValidator>();
+
+//Repository
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+
+
+
+
 
 var app = builder.Build();
 

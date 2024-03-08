@@ -1,11 +1,15 @@
-﻿using f1api.DTOs;
+﻿using AutoMapper;
+using f1api.DTOs;
 using f1api.Models;
 using f1api.Service.IService;
+using F1api.Repository;
+using F1api.Repository.IRepository;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace f1api.Service
@@ -15,39 +19,45 @@ namespace f1api.Service
         private F1Context _context;
         private HttpClient _client;
         private IConfiguration _config;
-        public DriverService(F1Context context, HttpClient client, IConfiguration config)
+        private readonly IDriverRepository _driverRepository;
+        private readonly IMapper _mapper;
+
+        public DriverService(F1Context context, HttpClient client, IConfiguration config, IDriverRepository driverRepository , IMapper mapper)
         {
             _config = config;
             _context = context;
             _client = client;
+            _driverRepository = driverRepository;
+            _mapper = mapper;
         }
         public async  Task<Driver> Create(Driver entity)
         {
-            await _context.Drivers.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            await _driverRepository.Add(entity);
+            await _driverRepository.Save();
             return entity;
         }
 
-        public Task Delete(Driver entity)
+        public async Task Delete(Driver entity)
         {
-          var driverToDelete = _context.Drivers.Find(entity.Id);
+          var driverToDelete = await _driverRepository.GetById(entity.Id);
             if (driverToDelete != null)
             {
-                _context.Drivers.Remove(driverToDelete);
-                _context.SaveChanges();
+                await _driverRepository.Delete(entity);
+
+              await  _driverRepository.Save();
             }
             else
             {
                 throw new Exception("Driver Not Found");
             }
-            return Task.CompletedTask;
+           
         }
 
-        public async Task<List<Driver>> GetAll()
+        public async Task<IEnumerable<Driver>> GetAll()
         {
             try
             {
-                var drivers = await _context.Drivers.ToListAsync();
+                var drivers = await _driverRepository.GetAll();
                 if (!drivers.IsNullOrEmpty())
                 {
                     return drivers;
@@ -67,11 +77,17 @@ namespace f1api.Service
 
         public async Task<IEnumerable<CardDriverDto>> GetAllCardDrivers()
         {
-           
-            string url = _config["AppSettings:BaseUrl"] + "/api/Driver";
-            Debug.Print(url + "hola");  
-            var result = await _client.GetFromJsonAsync<IEnumerable<CardDriverDto>>(url);
-          
+
+            /* string url = _config["AppSettings:BaseUrl"] + "/api/Driver";
+             Debug.Print(url + "hola");  
+             var result = await _client.GetFromJsonAsync<IEnumerable<CardDriverDto>>(url);
+           */
+            var drivers = await _driverRepository.GetAll();
+            var result =  _mapper.Map<IEnumerable<CardDriverDto>>(drivers);
+
+
+
+
             return result;
         }
 
